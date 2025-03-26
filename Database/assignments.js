@@ -1,4 +1,4 @@
-[
+const assignments =[
   {
     "_id": "A101",
     "title": "Propulsion Assignment",
@@ -80,4 +80,5 @@
     "availableFrom": "2024-08-01",
     "availableUntil": "2024-08-20"
   }
-]
+];
+export default assignments;
