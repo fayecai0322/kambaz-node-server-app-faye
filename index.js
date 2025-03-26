@@ -2,11 +2,11 @@ import express from 'express';
 import cors from "cors";
 import Hello from "./Hello.js"; //import hello
 import Lab5 from './Lab5/index.js';
-import UserRoutes from "../kambaz-react-web-app/src/Kambaz/Users/routes.js";
-import CourseRoutes from "../kambaz-react-web-app/src/Kambaz/Courses/routes.js";
-import EnrollmentRoutes from "../kambaz-react-web-app/src/Kambaz/Enrollments/routes.js";
-import ModuleRoutes from "../kambaz-react-web-app/src/Kambaz/Modules/routes.js";
-import AssignmentRoutes from "../kambaz-react-web-app/src/Kambaz/Assignments/routes.js"; // ✅ 新增
+import UserRoutes from "./Users/routes.js";
+import CourseRoutes from "./Courses/routes.js";
+import EnrollmentRoutes from "./Enrollments/routes.js";
+import ModuleRoutes from "./Modules/routes.js";
+import AssignmentRoutes from "./Assignments/routes.js"; 
 import session from "express-session";
 import "dotenv/config";
 
