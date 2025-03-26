@@ -69,7 +69,7 @@ AssignmentRoutes(app);
 Hello(app) //pass app reference to Hello
 Lab5(app);
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000; 
 app.listen(PORT, () => {
      // ✅ 在服务器启动后再检查路由
     // console.log("📌 注册的路由列表:", 
