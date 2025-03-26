@@ -32,16 +32,31 @@ const app = express(); // 创建 Express 实例
                 process.env.NETLIFY_URL, // ✅ 线上 Netlify 部署
                 "http://localhost:5173", // ✅ Vite 本地开发
                 "http://localhost:4000", // ✅ API 服务器本地测试
+                "https://kambaz-react-web-app-a5.netlify.app",
             ].filter(Boolean), // ❗ 确保不会传入 `undefined`
             methods: "GET,POST,PUT,DELETE,OPTIONS",
             allowedHeaders: "Content-Type,Authorization",
         })
     );
+// const sessionOptions = {
+//     secret: process.env.SESSION_SECRET || "kambaz",//用于加密 session 数据
+//     resave: false,//禁止无修改时重新保存 session
+//     saveUninitialized: false, //禁止存储未初始化的 session
+// };
+
+// ✅ 解析请求体
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// ✅ 设置 Session
 const sessionOptions = {
-    secret: process.env.SESSION_SECRET || "kambaz",//用于加密 session 数据
-    resave: false,//禁止无修改时重新保存 session
-    saveUninitialized: false, //禁止存储未初始化的 session
-};
+    secret: process.env.SESSION_SECRET || "kambaz",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      sameSite: "none",
+      secure: true, // Heroku/Render 默认使用 HTTPS
+    }
+  };
 
 // ✅ 仅在生产环境启用 `secure`，开发环境允许 HTTP
 if (process.env.NODE_ENV !== "development"){
@@ -54,8 +69,8 @@ if (process.env.NODE_ENV !== "development"){
 }
 
 // ✅ 确保 JSON 解析（⚠️ 确保在所有路由之前）
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
 app.use(session(sessionOptions));
 
 //Kamabaz Project
