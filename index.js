@@ -73,6 +73,10 @@ if (process.env.NODE_ENV !== "development"){
 // app.use(express.urlencoded({ extended: true }));
 app.use(session(sessionOptions));
 
+app.use((req, res, next) => {
+    console.log("🧠 Session:", req.session);
+    next();
+  });
 //Kamabaz Project
 UserRoutes(app);
 CourseRoutes(app);
