@@ -59,16 +59,27 @@ export default function UserRoutes(app){
 
     const findCoursesForEnrolledUser = (req, res) => {
         let { userId } = req.params;
+        console.log("🧠 Session inside /current/courses:", req.session);
         if (userId === "current") {
             const currentUser = req.session["currentUser"];
             if (!currentUser) {
+                console.log("❌ No current user in session");
                 res.sendStatus(401);
                 return;
             }
+            console.log("✅ Found current user:", currentUser);
             userId = currentUser._id;
         }
 
-        const enrollments = enrollmentsDao.findEnrollmentsByUserId(userId);
+        try {
+            const courses = courseDao.findCoursesForEnrolledUser(userId);
+            res.json(courses);
+          } catch (err) {
+            console.error("🔥 Error in findCoursesForEnrolledUser:", err);
+            res.sendStatus(500);
+          }
+
+        const enrollments = enrollmentsDao.findEnrollmentsByUser(userId);
         const courseIds = enrollments.map(e => e.course);
         const allCourses = courseDao.findAllCourses();
         const enrolledCourses = allCourses.filter(c => courseIds.includes(c._id));
