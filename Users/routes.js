@@ -27,17 +27,16 @@ export default function UserRoutes(app){
         res.json(currentUser);
     };
 
-    const signin = (req, res) => {
+    const signin = async (req, res) => {
         const { username, password } = req.body;
-    
-        const currentUser = dao.findUserByCredentials(username, password);
+        const currentUser = await dao.findUserByCredentials(username, password);  // ✅ 加上 await
         console.log("🔎 Found user:", currentUser);
-
-        if(currentUser){
+    
+        if (currentUser) {
             req.session["currentUser"] = currentUser;
             res.json(currentUser);
-        }else{
-            res.status(401).json({message:"Unable to login. Try again later."});
+        } else {
+            res.status(401).json({ message: "Unable to login. Try again later." });
         }
     };
 
@@ -103,7 +102,7 @@ export default function UserRoutes(app){
     app.get("/api/users/:userId/courses", findCoursesForEnrolledUser);
     app.post("/api/users/current/courses", createCourse);
 
-    app.get("/api/users", (_, res) => res.send(dao.findAllUsers()));
+    // app.get("/api/users", (_, res) => res.send(dao.findAllUsers()));
     app.get("/api/users/:userId", (req, res) => res.send(dao.findUserById(req.params.userId)));
     app.put("/api/users/:userId", updateUser);
     app.delete("/api/users/:userId", (req, res) => res.send(dao.deleteUser(req.params.userId)));
