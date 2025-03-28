@@ -48,6 +48,9 @@ export function createModule(courseId, moduleData) {
 export function addLessonToModule(moduleId, lessonData) {
     const { modules } = Database;
     const module = modules.find((m) => m._id === moduleId);
+
+    console.log("🧪 moduleId:", moduleId);
+    console.log("📥 lessonData received:", lessonData);
   
     if (!module) {
       throw new Error(`Module with ID ${moduleId} not found`);
@@ -65,5 +68,6 @@ export function addLessonToModule(moduleId, lessonData) {
     }
   
     module.lessons.push(newLesson);
+    console.log("✅ newLesson added:", newLesson);
     return newLesson;
   }
