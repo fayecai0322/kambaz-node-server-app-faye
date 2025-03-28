@@ -9,7 +9,7 @@ export const createUser = (user) => {
     console.log("✅ Creating new user:", newUser);
 
     users = [...users, newUser];
-    db.users = users;  // ✅ 确保存入 database
+    db.users.push(newUser);  // ✅ 确保存入 database
     console.log("🔄 Updated users list:", db.users);
     return newUser;
 };
@@ -20,11 +20,9 @@ export const findUserById = (userId) => users.find((user) => user._id === userId
 //根据用户名查找用户
 export const findUserByUsername = (username) => users.find((user) => user.username === username); 
 //验证用户身份（登录时使用）
-export const findUserByCredentials = async (username, password) => {
-    return Database.users.find(
-        (u) => u.username === username && u.password === password
-    );
-};
+export const findUserByCredentials = async (username, password) =>
+  db.users.find((u) => u.username === username && u.password === password);
+
 //更新用户信息
 export const updateUser = (userId, user) => (users = users.map((u) => (u._id === userId ? user : u)));
 //删除用户
