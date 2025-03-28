@@ -56,21 +56,24 @@ export default function UserRoutes(app){
         res.sendStatus(200); 
     };
 
+
     const findCoursesForEnrolledUser = (req, res) => {
-        let {userId} = req.params;
+        let { userId } = req.params;
         if (userId === "current") {
-            console.log("🔍 Checking session:", req.session);  // 打印 session 内容
             const currentUser = req.session["currentUser"];
             if (!currentUser) {
-                console.log("❌ No current user in session");
                 res.sendStatus(401);
                 return;
             }
-            console.log("✅ Found user:", currentUser);
             userId = currentUser._id;
         }
-        const courses = courseDao.findCoursesForEnrolledUser(userId);
-        res.json(courses);
+
+        const enrollments = enrollmentsDao.findEnrollmentsByUser(userId);
+        const courseIds = enrollments.map(e => e.course);
+        const allCourses = courseDao.findAllCourses();
+        const enrolledCourses = allCourses.filter(c => courseIds.includes(c._id));
+
+        res.json(enrolledCourses);
     };
 
     const createCourse = (req,res)=> {
@@ -94,5 +97,10 @@ export default function UserRoutes(app){
     app.get("/api/users/current/courses", findCoursesForEnrolledUser);
     app.get("/api/users/:userId/courses", findCoursesForEnrolledUser);
     app.post("/api/users/current/courses", createCourse);
+
+    app.get("/api/users", (_, res) => res.send(dao.findAllUsers()));
+    app.get("/api/users/:userId", (req, res) => res.send(dao.findUserById(req.params.userId)));
+    app.put("/api/users/:userId", updateUser);
+    app.delete("/api/users/:userId", (req, res) => res.send(dao.deleteUser(req.params.userId)));
 
 }

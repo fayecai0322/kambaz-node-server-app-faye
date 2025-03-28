@@ -30,7 +30,7 @@ export function findCoursesForEnrolledUser(userId){
 //Returns the newly created course
 export function createCourse(course){
     const newCourse = {...course, _id:uuidv4()};
-    Database.course = [...Database.course,newCourse];
+    Database.courses = [...Database.courses,newCourse];
     return newCourse;
 }
 //backend ,filters out the course from Database.courses
