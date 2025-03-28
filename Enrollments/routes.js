@@ -17,7 +17,7 @@ export default function EnrollmentRoutes(app){
     // ✅ 获取某个用户的所有注册课程
     router.get("/:userId", (req, res) => {
         const { userId } = req.params;
-        const enrollments = enrollmentsDao.findEnrollmentsByUserId(userId);
+        const enrollments = enrollmentsDao.findEnrollmentsByUser(userId);
         res.json(enrollments);
     });
 
