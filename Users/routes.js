@@ -57,7 +57,7 @@ export default function UserRoutes(app){
 
 
     const findCoursesForEnrolledUser = (req, res) => {
-        let { userId } = req.params;
+        let userId = req.params.userId || "current";
         console.log("🧠 Session inside /current/courses:", req.session);
       
         if (userId === "current") {
