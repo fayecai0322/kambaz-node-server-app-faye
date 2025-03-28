@@ -5,11 +5,25 @@ export function findAllCourses(){
     return Database.courses;
 }
 export function findCoursesForEnrolledUser(userId){
-    const{courses, enrollments} = Database;
+    const { courses, enrollments } = Database;
+  
+    console.log("🧾 All enrollments:", enrollments);
+    console.log("📚 All courses:", courses);
+    console.log("🔍 Looking for courses for user:", userId);
+  
     const enrolledCourses = courses.filter((course) => 
-        enrollments.some((enrollment)=> enrollment.user === userId && enrollment.course === course._id));
+      enrollments.some((enrollment) => {
+        const match = enrollment.user === userId && enrollment.course === course._id;
+        if (match) {
+          console.log(`✅ Matched course: ${course._id} for user: ${userId}`);
+        }
+        return match;
+      })
+    );
+  
+    console.log("📦 Final enrolled courses:", enrolledCourses);
     return enrolledCourses;
-}
+  }
 
 //Generates a new unique ID for the course
 //Saves the new course into Database.courses

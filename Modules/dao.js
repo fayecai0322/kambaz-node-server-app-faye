@@ -53,6 +53,7 @@ export function addLessonToModule(moduleId, lessonData) {
     console.log("📥 lessonData received:", lessonData);
   
     if (!module) {
+      console.error("❌ Module not found:", moduleId);
       throw new Error(`Module with ID ${moduleId} not found`);
     }
   
