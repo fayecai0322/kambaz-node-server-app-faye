@@ -64,7 +64,7 @@ if (process.env.NODE_ENV !== "development"){
     sessionOptions.cookie = {
         sameSite:"none", // 允许跨域 cookies
         secure:true,  // 仅 HTTPS 允许
-        domain:process.env.NODE_SERVER_DOMAIN, // 限制 cookie 作用域
+        // domain:process.env.NODE_SERVER_DOMAIN, // 限制 cookie 作用域
     };
 }
 
