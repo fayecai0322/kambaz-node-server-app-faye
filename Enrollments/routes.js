@@ -5,7 +5,7 @@ const router = express.Router();  // ✅ 必须先定义 router
 
 export default function EnrollmentRoutes(app){
     // ✅ 用户注册课程
-    router.post("/api/enrollments", (req, res) => {
+    router.post("/", (req, res) => {
         const { userId, courseId } = req.body;
         if (!userId || !courseId) {
             return res.status(400).json({ error: "userId and courseId are required" });
@@ -15,14 +15,14 @@ export default function EnrollmentRoutes(app){
     });
 
     // ✅ 获取某个用户的所有注册课程
-    router.get("/api/enrollments/:userId", (req, res) => {
+    router.get("/:userId", (req, res) => {
         const { userId } = req.params;
         const enrollments = enrollmentsDao.findEnrollmentsByUserId(userId);
         res.json(enrollments);
     });
 
     // ✅ 取消用户注册的课程
-    router.delete("/api/enrollments/:userId/:courseId", (req, res) => {
+    router.delete("/:userId/:courseId", (req, res) => {
         const { userId, courseId } = req.params;
         enrollmentsDao.unenrollUserFromCourse(userId, courseId);
         res.status(204).send(); // No Content
