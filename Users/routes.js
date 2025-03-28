@@ -68,7 +68,7 @@ export default function UserRoutes(app){
             userId = currentUser._id;
         }
 
-        const enrollments = enrollmentsDao.findEnrollmentsByUser(userId);
+        const enrollments = enrollmentsDao.findEnrollmentsByUserId(userId);
         const courseIds = enrollments.map(e => e.course);
         const allCourses = courseDao.findAllCourses();
         const enrolledCourses = allCourses.filter(c => courseIds.includes(c._id));
