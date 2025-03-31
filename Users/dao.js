@@ -24,6 +24,9 @@ export const findUserByCredentials = async (username, password) =>
   db.users.find((u) => u.username === username && u.password === password);
 
 //更新用户信息
-export const updateUser = (userId, user) => (users = users.map((u) => (u._id === userId ? user : u)));
+export const updateUser = (userId, updatedUser) => {
+  users = users.map((u) => (u._id === userId ? updatedUser : u));
+  db.users = [...users]; // ✅ 保证 db.users 也同步更新
+};
 //删除用户
 export const deleteUser = (userId) => (users = users.filter((u) => u._id !== userId)); 

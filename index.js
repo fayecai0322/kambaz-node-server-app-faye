@@ -9,21 +9,9 @@ import ModuleRoutes from "./Modules/routes.js";
 import AssignmentRoutes from "./Assignments/routes.js"; 
 import session from "express-session";
 import "dotenv/config";
-
+// import SessionController from './Lab5/SessionController.js';
 
 const app = express(); // 创建 Express 实例
-// ✅ 允许前端 http://localhost:5173 访问
-// app.use(cors({
-//     origin: "http://localhost:5173",
-//     methods: "GET,POST,PUT,DELETE",
-//     allowedHeaders: "Content-Type,Authorization"
-// }));
-    // app.use(
-    //     cors({
-    //     credentials: true, // ✅ 让请求带上 cookies 和 session
-    //     origin: process.env.NETLIFY_URL || "http://localhost:5173" ,  // ✅ 允许多个环境
-    //     })
-    // );
 
     app.use(
         cors({
@@ -38,25 +26,31 @@ const app = express(); // 创建 Express 实例
             allowedHeaders: "Content-Type,Authorization",
         })
     );
-// const sessionOptions = {
-//     secret: process.env.SESSION_SECRET || "kambaz",//用于加密 session 数据
-//     resave: false,//禁止无修改时重新保存 session
-//     saveUninitialized: false, //禁止存储未初始化的 session
-// };
-
 // ✅ 解析请求体
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // ✅ 设置 Session
+// const sessionOptions = {
+//     secret: process.env.SESSION_SECRET || "kambaz",
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       sameSite: "none",
+//       secure: true, // Heroku/Render 默认使用 HTTPS
+//     }
+//   };
+/** ✅ Session 设置，兼容开发和生产 */
+const isDev = process.env.NODE_ENV === "development";
 const sessionOptions = {
-    secret: process.env.SESSION_SECRET || "kambaz",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      sameSite: "none",
-      secure: true, // Heroku/Render 默认使用 HTTPS
-    }
-  };
+  secret: process.env.SESSION_SECRET || "kambaz",
+  resave: false,
+  saveUninitialized: false,
+  proxy: !isDev,
+  cookie: {
+    sameSite: isDev ? "lax" : "none", // 本地 lax，生产 none
+    secure: !isDev                   // 本地 false，生产 true（HTTPS 才能 set-cookie）
+  }
+};
 
 // ✅ 仅在生产环境启用 `secure`，开发环境允许 HTTP
 if (process.env.NODE_ENV !== "development"){
@@ -87,15 +81,11 @@ AssignmentRoutes(app);
 //Lab Part
 Hello(app) //pass app reference to Hello
 Lab5(app);
+// SessionController(app);
 
 const PORT = process.env.PORT || 4000; 
 app.listen(PORT, () => {
-     // ✅ 在服务器启动后再检查路由
-    // console.log("📌 注册的路由列表:", 
-    //     app._router.stack
-    //         .map(layer => layer.route && layer.route.path)
-    //         .filter(Boolean)
-    // );
+
     console.log("UserRoutes:", typeof UserRoutes);
     console.log("CourseRoutes:", typeof CourseRoutes);
     console.log("EnrollmentRoutes:", typeof EnrollmentRoutes);

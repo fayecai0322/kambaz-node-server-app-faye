@@ -8,37 +8,51 @@ export default function UserRoutes(app){
     const deleteUser = (req, res) => { };
     const findAllUsers = (req, res) => { };
     const findUserById = (req, res) => { };
-    const updateUser = (req, res) => {
-        const userId = req.params.userId;
-        const userUpdates = req.body;
-        dao.updateUser(userId, userUpdates);
-        const currentUser = dao.findUserById(userId);
-        req.session["currentUser"] = currentUser;
-        res.json(currentUser);
-     };
-    const signup = (req, res) => { 
-        const user = dao.findUserByUsername(req.body.username);
-        if (user) {
-            res.status(400).json({ message: "Username already in use" });
-            return;
+    const updateUser = async (req, res) => {
+        try {
+            const userId = req.params.userId;
+            const userUpdates = req.body;
+            await dao.updateUser(userId, userUpdates);
+            const currentUser = await dao.findUserById(userId);
+            req.session["currentUser"] = currentUser;
+            res.json(currentUser);
+        } catch (error) {
+            res.status(500).json({ error: error.message || "Internal server error" });
         }
-        const currentUser = dao.createUser(req.body);
-        req.session["currentUser"] = currentUser;
-        res.json(currentUser);
+    };
+    const signup = async (req, res) => {
+        try {
+            const user = await dao.findUserByUsername(req.body.username);
+            if (user) {
+                res.status(400).json({ message: "Username already in use" });
+                return;
+            }
+            const currentUser = await dao.createUser(req.body);
+            req.session["currentUser"] = currentUser;
+            res.json(currentUser);
+        } catch (error) {
+            res.status(500).json({ error: error.message || "Internal server error" });
+        }
     };
 
     const signin = async (req, res) => {
-        const { username, password } = req.body;
-        const currentUser = await dao.findUserByCredentials(username, password);  // ✅ 加上 await
-        console.log("🔎 Found user:", currentUser);
-    
-        if (currentUser) {
-            req.session["currentUser"] = currentUser;
-            res.json(currentUser);
-        } else {
-            res.status(401).json({ message: "Unable to login. Try again later." });
+        try {
+            const { username, password } = req.body;
+            const currentUser = await dao.findUserByCredentials(username, password);
+            console.log("🔎 Found user:", currentUser);
+          
+            if (currentUser) {
+                req.session["currentUser"] = currentUser;
+                console.log("Session after signin:", req.session); // 添加日志
+                res.json(currentUser);
+            } else {
+                res.status(401).json({ error: "Incorrect username or password" });
+            }
+        } catch (error) {
+            res.status(500).json({ error: error.message || "Internal server error" });
         }
     };
+
 
     const profile = (req, res) => { 
         const currentUser = req.session["currentUser"];
@@ -56,36 +70,43 @@ export default function UserRoutes(app){
     };
 
 
-    const findCoursesForEnrolledUser = (req, res) => {
-        let userId = req.params.userId || "current";
-        console.log("🧠 Session inside /current/courses:", req.session);
-      
-        if (userId === "current") {
-          const currentUser = req.session["currentUser"];
-          if (!currentUser) {
-            console.log("❌ No current user in session");
-            res.sendStatus(401);
-            return;
-          }
-          console.log("✅ Found current user:", currentUser);
-          userId = currentUser._id;
-        }
-      
+    const findCoursesForEnrolledUser = async (req, res) => {
         try {
-          const courses = courseDao.findCoursesForEnrolledUser(userId);
-          res.json(courses);
-        } catch (err) {
-          console.error("🔥 Error in findCoursesForEnrolledUser:", err);
-          res.sendStatus(500);
-        }
-      };
+            let userId = req.params.userId || "current";
+            console.log("🧠 Session inside /current/courses:", req.session);
+            console.log("Session user before check:", req.session["currentUser"]);
+            console.log("Request headers:", req.headers); // 添加日志
+            console.log("Request cookies:", req.cookies); // 添加日志
 
-    const createCourse = (req,res)=> {
-        const currentUser = req.session["currentUser"]; //Extracts the currentUser from the session
-        const newCourse = courseDao.createCourse(req.body);//Calls createCourse() to store the course in the database
-        enrollmentsDao.enrollUserInCourse(currentUser._id, newCourse._id);//Calls enrollUserInCourse() to link the user with the course
-        res.json(newCourse);//Sends back the created course as a response
-    }
+            if (userId === "current") {
+                const currentUser = req.session["currentUser"];
+                if (!currentUser) {
+                    console.log("❌ No current user in session");
+                    res.sendStatus(401);
+                    return;
+                }
+                console.log("✅ Found current user:", currentUser);
+                userId = currentUser._id;
+            }
+
+            const courses = await courseDao.findCoursesForEnrolledUser(userId);
+            res.json(courses);
+        } catch (error) {
+            console.error("🔥 Error in findCoursesForEnrolledUser:", error);
+            res.status(500).json({ error: error.message || "Internal server error" });
+        }
+    };
+
+    const createCourse = async (req, res) => {
+        try {
+            const currentUser = req.session["currentUser"];
+            const newCourse = await courseDao.createCourse(req.body);
+            await enrollmentsDao.enrollUserInCourse(currentUser._id, newCourse._id);
+            res.json(newCourse);
+        } catch (error) {
+            res.status(500).json({ error: error.message || "Internal server error" });
+        }
+    };
     
  
 
