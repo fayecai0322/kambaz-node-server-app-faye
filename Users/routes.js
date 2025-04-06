@@ -1,13 +1,48 @@
 import * as dao from "./dao.js";
 import * as courseDao from "../Courses/dao.js";
 import * as enrollmentsDao from "../Enrollments/dao.js";
+import model from "./model.js";
 
 //let currentUser = null;
 export default function UserRoutes(app){
-    const createUser = (req, res) => { };
-    const deleteUser = (req, res) => { };
-    const findAllUsers = (req, res) => { };
-    const findUserById = (req, res) => { };
+    const createUser = async(req, res) => {
+        try {
+            const user = await dao.createUser(req.body);
+            res.status(201).json(user);
+          } catch (e) {
+            console.error("❌ Error creating user:", e);
+            res.status(500).json({ error: e.message || "Error creating user" });
+          }
+     };
+     const deleteUser = async (req, res) => {
+        console.log("🗑️ Deleting user:", req.params.userId);
+        try {
+          const result = await dao.deleteUser(req.params.userId);
+          if (result.deletedCount === 1) {
+            res.json({ success: true, message: "User deleted." });
+          } else {
+            res.status(404).json({ success: false, message: "User not found." });
+          }
+        } catch (err) {
+          console.error("❌ Delete user failed:", err);
+          res.status(500).json({ success: false, error: err.message });
+        }
+      };
+    const findAllUsers = async(req, res) => {
+        const {role,name} = req.query;
+        if(role){
+            const users = await dao.findUsersByRole(role);
+            res.json(users);
+            return;
+        }
+        if(name){
+            const users = await dao.findUsersByPartialName(name);
+            res.json(users);
+            return;
+        }
+        const users = await dao.findAllUsers();
+        res.json(users);
+     };
     const updateUser = async (req, res) => {
         try {
             const userId = req.params.userId;
@@ -40,15 +75,19 @@ export default function UserRoutes(app){
             const { username, password } = req.body;
             const currentUser = await dao.findUserByCredentials(username, password);
             console.log("🔎 Found user:", currentUser);
+            const users = await model.find();
+            console.log("🧾 All users:", users);
           
             if (currentUser) {
                 req.session["currentUser"] = currentUser;
                 console.log("Session after signin:", req.session); // 添加日志
-                res.json(currentUser);
+                // res.json(currentUser);
+                res.json(currentUser.toObject());
             } else {
                 res.status(401).json({ error: "Incorrect username or password" });
             }
         } catch (error) {
+            console.error("🔥 Error in signin route:", error);
             res.status(500).json({ error: error.message || "Internal server error" });
         }
     };
@@ -107,7 +146,10 @@ export default function UserRoutes(app){
             res.status(500).json({ error: error.message || "Internal server error" });
         }
     };
-    
+    const findUserById = async(req,res) => {
+        const user = await dao.findUserById(req.params.userId);
+        res.json(user);
+    }
  
 
     app.post("/api/users", createUser);
@@ -124,8 +166,7 @@ export default function UserRoutes(app){
     app.post("/api/users/current/courses", createCourse);
 
     // app.get("/api/users", (_, res) => res.send(dao.findAllUsers()));
-    app.get("/api/users/:userId", (req, res) => res.send(dao.findUserById(req.params.userId)));
-    app.put("/api/users/:userId", updateUser);
-    app.delete("/api/users/:userId", (req, res) => res.send(dao.deleteUser(req.params.userId)));
+    // app.get("/api/users/:userId", (req, res) => res.send(dao.findUserById(req.params.userId)));
+    // app.delete("/api/users/:userId", (req, res) => res.send(dao.deleteUser(req.params.userId)));
 
 }

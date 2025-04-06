@@ -9,6 +9,8 @@ import ModuleRoutes from "./Modules/routes.js";
 import AssignmentRoutes from "./Assignments/routes.js"; 
 import session from "express-session";
 import "dotenv/config";
+import mongoose from "mongoose";
+
 // import SessionController from './Lab5/SessionController.js';
 
 const app = express(); // 创建 Express 实例
@@ -84,11 +86,21 @@ Lab5(app);
 // SessionController(app);
 
 const PORT = process.env.PORT || 4000; 
-app.listen(PORT, () => {
+const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
+// mongoose.connect(CONNECTION_STRING)
+mongoose.connect(CONNECTION_STRING)
+  .then(() => {
+    console.log("✅ MongoDB connected successfully");
 
-    console.log("UserRoutes:", typeof UserRoutes);
-    console.log("CourseRoutes:", typeof CourseRoutes);
-    console.log("EnrollmentRoutes:", typeof EnrollmentRoutes);
-    console.log("ModuleRoutes:", typeof ModuleRoutes);
-    console.log(`✅ Server running on http://localhost:${PORT}`);
-});
+    // ✅ 成功连接 MongoDB 后再启动服务器
+    app.listen(PORT, () => {
+      console.log("✅ Server running on http://localhost:" + PORT);
+      console.log("UserRoutes:", typeof UserRoutes);
+      console.log("CourseRoutes:", typeof CourseRoutes);
+      console.log("EnrollmentRoutes:", typeof EnrollmentRoutes);
+      console.log("ModuleRoutes:", typeof ModuleRoutes);
+    });
+  })
+  .catch(err => {
+    console.error("❌ MongoDB connection failed:", err);
+  });

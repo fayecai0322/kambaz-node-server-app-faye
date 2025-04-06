@@ -1,5 +1,5 @@
 
-const users =  [
+const users =[
     {
       "_id": "123",
       "username": "iron_man",
