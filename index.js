@@ -87,21 +87,33 @@ Lab5(app);
 // SessionController(app);
 
 const PORT = process.env.PORT || 4000; 
-const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
+// const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
 // mongoose.connect(CONNECTION_STRING)
 mongoose.connect(CONNECTION_STRING)
   .then(() => {
     console.log("✅ MongoDB connected successfully");
 
-    // ✅ 成功连接 MongoDB 后再启动服务器
     app.listen(PORT, () => {
       console.log("✅ Server running on http://localhost:" + PORT);
-      console.log("UserRoutes:", typeof UserRoutes);
-      console.log("CourseRoutes:", typeof CourseRoutes);
-      console.log("EnrollmentRoutes:", typeof EnrollmentRoutes);
-      console.log("ModuleRoutes:", typeof ModuleRoutes);
     });
   })
   .catch(err => {
     console.error("❌ MongoDB connection failed:", err);
   });
+
+// mongoose.connect(CONNECTION_STRING)
+//   .then(() => {
+//     console.log("✅ MongoDB connected successfully");
+
+//     // ✅ 成功连接 MongoDB 后再启动服务器
+//     app.listen(PORT, () => {
+//       console.log("✅ Server running on http://localhost:" + PORT);
+//       console.log("UserRoutes:", typeof UserRoutes);
+//       console.log("CourseRoutes:", typeof CourseRoutes);
+//       console.log("EnrollmentRoutes:", typeof EnrollmentRoutes);
+//       console.log("ModuleRoutes:", typeof ModuleRoutes);
+//     });
+//   })
+//   .catch(err => {
+//     console.error("❌ MongoDB connection failed:", err);
+//   });
