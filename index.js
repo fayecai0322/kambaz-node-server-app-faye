@@ -23,6 +23,7 @@ const app = express(); // 创建 Express 实例
                 "http://localhost:5173", // ✅ Vite 本地开发
                 "http://localhost:4000", // ✅ API 服务器本地测试
                 "https://kambaz-react-web-app-a5-new.netlify.app",
+                "https://kambaz-react-web-app-a6.netlify.app",
             ].filter(Boolean), // ❗ 确保不会传入 `undefined`
             methods: "GET,POST,PUT,DELETE,OPTIONS",
             allowedHeaders: "Content-Type,Authorization",
