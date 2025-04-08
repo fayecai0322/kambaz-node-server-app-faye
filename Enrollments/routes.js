@@ -1,5 +1,6 @@
 import express from "express";
 import * as enrollmentsDao from "./dao.js";
+import * as courseDao from "../Courses/dao.js";
 
 const router = express.Router();  // ✅ 必须先定义 router
 
@@ -14,9 +15,30 @@ export default function EnrollmentRoutes(app){
         res.json(all);
       };
     const findEnrollmentsForUser = async (req, res) => {
-    const { userId } = req.params;
-    const enrollments = await enrollmentsDao.findEnrollmentsByUser(userId);
-    res.json(enrollments);
+      const { userId } = req.params;
+      const enrollments = await enrollmentsDao.findEnrollmentsByUser(userId);
+      res.json(enrollments);
+    };
+    const findCoursesForUser = async (req, res) => {
+      const currentUser = req.session["currentUser"];
+      if (!currentUser) {
+        res.sendStatus(401);
+        return;
+      }
+  
+      if (currentUser.role === "ADMIN") {
+        const courses = await courseDao.findAllCourses();
+        res.json(courses);
+        return;
+      }
+  
+      let { uid } = req.params;
+      if (uid === "current") {
+        uid = currentUser._id;
+      }
+  
+      const courses = await enrollmentsDao.findCoursesForUser(uid);
+      res.json(courses);
     };
     // ✅ 用户注册课程
     router.post("/", async (req, res) => {
@@ -45,4 +67,5 @@ export default function EnrollmentRoutes(app){
     app.get("/api/user/:userId/enrollments", findEnrollmentsForUser);
     app.get("/api/enrollments",findAllEnrollments);
     app.get("/api/course/:courseId/enrollments",findEnrollmentsForCourse);
+    app.get("/api/users/:uid/courses", findCoursesForUser);
 }

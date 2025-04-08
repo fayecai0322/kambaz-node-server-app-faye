@@ -1,5 +1,5 @@
 // import Database from "../Database/index.js";
-import {v4 as uuidv4} from "uuid";
+// import {v4 as uuidv4} from "uuid";
 import model from "./model.js";
 
 export async function updateModule(moduleId, moduleUpdates) {
@@ -13,10 +13,6 @@ export async function updateModule(moduleId, moduleUpdates) {
         console.error("❌ Error in updateModule:", error);
         throw error;
     }
-    // const { modules } = Database;
-    // const module = modules.find((module) => module._id === moduleId);
-    // Object.assign(module, moduleUpdates);
-    // return module;
 }
     
 export async function deleteModule(moduleId){
@@ -32,16 +28,6 @@ export async function deleteModule(moduleId){
 }
 
 export async function findModulesForCourse(courseId) {
-    // if (!Database.modules) {
-    //     console.error("🚨 Database.modules is undefined!");
-    //     return [];  // 返回空数组，避免 `undefined.filter()`
-    // }
-
-    // console.log(`📌 Fetching modules for courseId: ${courseId}`);
-    // const foundModules = Database.modules.filter((module) => module.course === courseId);
-    
-    // console.log("✅ Found modules:", foundModules);
-    // return foundModules;
     try{
         const foundModules = await model.find({ course: courseId });
         return foundModules;    
@@ -54,85 +40,69 @@ export async function findModulesForCourse(courseId) {
 // ✅ 添加模块
 export async function createModule(courseId, moduleData) {
     try {
-        if (!courseId || !moduleData || !moduleData.name) {
-          throw new Error("Invalid module data");
-        }
-        const newModule = await model.create({
-          _id: uuidv4(),
-          course: courseId,
-          name: moduleData.name || "New Module",
-          description: moduleData.description || "Default description",
-          lessons: [],
-        });
-    
-        return newModule;
-      } catch (error) {
-        console.error("❌ Error in createModule:", error);
-        throw error;
+      if (moduleData._id) {
+        delete moduleData._id;
       }
-    // if (!courseId || !moduleData || !moduleData.name) {
-    //     throw new Error("Invalid module data");
-    // }
-    // const newModule = {
-    //     _id: uuidv4(),
-    //     course: courseId,
-    //     name: moduleData.name || "New Module",
-    //     lessons: [],
-    //     description: moduleData.description || "Default description",
-    // };
-    // // 🚨 **确保 `Database.modules` 存在**
-    // if (!Database.modules) {
-    //     Database.modules = [];
-    // }
-    // Database.modules.push(newModule);
-    // return newModule;
+    // 组合新的模块对象，带上课程 ID
+    const newModule = {
+      ...moduleData,
+      course: courseId,
+    };
+    // 存入 MongoDB
+    const createdModule = await model.create(newModule);
+    return createdModule;
+    } catch (error) {
+      console.error("❌ Error in createModule:", error);
+      throw error;
+    }
 }
 export async function addLessonToModule(moduleId, lessonData) {
-    try {
-        const module = await model.findById(moduleId);
-    
-        if (!module) {
-          throw new Error(`Module with ID ${moduleId} not found`);
-        }
-    
-        const newLesson = {
-          _id: uuidv4(),
-          name: lessonData.name || "New Lesson",
-          description: lessonData.description || "",
-          module: moduleId,
-        };
-    
-        module.lessons.push(newLesson);
-        await module.save();
-    
-        return newLesson;
-      } catch (error) {
-        console.error("❌ Error in addLessonToModule:", error);
-        throw error;
-      }
-    // const { modules } = Database;
-    // const module = modules.find((m) => m._id === moduleId);
+  try {
+    const module = await model.findById(moduleId);
+    if (!module) {
+      throw new Error(`Module with ID ${moduleId} not found`);
+    }
 
-    // console.log("🧪 moduleId:", moduleId);
-    // console.log("📥 lessonData received:", lessonData);
-  
-    // if (!module) {
-    //   console.error("❌ Module not found:", moduleId);
-    //   throw new Error(`Module with ID ${moduleId} not found`);
-    // }
-  
-    // const newLesson = {
-    //   _id: uuidv4(),
-    //   name: lessonData.name || "New Lesson",
-    //   description: lessonData.description || "",
-    //   module: moduleId,
-    // };
-  
-    // if (!module.lessons) {
-    //   module.lessons = [];
-    // }
-  
-    // module.lessons.push(newLesson);
-    // console.log("✅ newLesson added:", newLesson);
-    // return newLesson;
+    const newLesson = {
+      name: lessonData.name || "New Lesson",
+      description: lessonData.description || "",
+      editing: lessonData.editing || false,
+    };
+
+    module.lessons.push(newLesson);
+    await module.save();
+
+    console.log("✅ 成功添加 lesson，新 lesson 列表:", module.lessons);
+    // ✅ 返回新添加的那一个 lesson（包含自动生成的 _id）
+    return module.lessons[module.lessons.length - 1];
+  } catch (error) {
+    console.error("❌ Error in addLessonToModule:", error);
+    throw error;
   }
+}
+export async function updateLesson(moduleId, lessonId, updates) {
+  try {
+    const module = await model.findById(moduleId);
+    if (!module) throw new Error(`Module ${moduleId} not found`);
+
+    console.log("📋 module.lessons:", module.lessons.map((l) => l._id?.toString()));
+    console.log("🔍 lessonId param:", lessonId);
+
+    const lesson = module.lessons.find(
+      (l) => l._id?.toString() === lessonId?.toString()
+    );
+
+    if (!lesson) {
+      throw new Error(`Lesson ${lessonId} not found in module ${moduleId}`);
+    }
+
+    Object.assign(lesson, updates);
+    await module.save();
+
+    console.log("✅ Lesson updated:", lesson);
+    return lesson;
+  } catch (error) {
+    console.error("❌ Error in updateLesson:", error);
+    throw error;
+  }
+}

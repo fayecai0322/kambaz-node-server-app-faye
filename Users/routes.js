@@ -150,6 +150,37 @@ export default function UserRoutes(app){
         const user = await dao.findUserById(req.params.userId);
         res.json(user);
     }
+    const enrollUserInCourse = async (req, res) => {
+        let { uid, cid } = req.params;
+        if (uid === "current") {
+          const currentUser = req.session["currentUser"];
+          if (!currentUser) return res.sendStatus(401);
+          uid = currentUser._id;
+        }
+        try {
+          const status = await enrollmentsDao.enrollUserInCourse(uid, cid);
+          res.send(status);
+        } catch (err) {
+          console.error("❌ Error enrolling user:", err);
+          res.status(500).json({ error: err.message || "Internal server error" });
+        }
+      };
+      
+      const unenrollUserFromCourse = async (req, res) => {
+        let { uid, cid } = req.params;
+        if (uid === "current") {
+          const currentUser = req.session["currentUser"];
+          if (!currentUser) return res.sendStatus(401);
+          uid = currentUser._id;
+        }
+        try {
+          const status = await enrollmentsDao.unenrollUserFromCourse(uid, cid);
+          res.send(status);
+        } catch (err) {
+          console.error("❌ Error unenrolling user:", err);
+          res.status(500).json({ error: err.message || "Internal server error" });
+        }
+      };
  
 
     app.post("/api/users", createUser);

@@ -23,33 +23,16 @@ export async function findCoursesForEnrolledUser(userId) {
   try {
     // const { courses, enrollments } = db;
 
+    // 1. 先查该用户的所有注册记录
+    const enrollments = await enrollmentModel.find({ user: userId });
+    // 2. 提取所有注册的 courseId
+    const courseIds = enrollments.map((e) => e.course);
+    // 3. 查找所有课程
+    const courses = await model.find({ _id: { $in: courseIds } });
     console.log("🧾 All enrollments:", enrollments);
     console.log("📚 All courses:", courses);
     console.log("🔍 Looking for courses for user:", userId);
-    // 1. 先查该用户的所有注册记录
-    const enrollments = await enrollmentModel.find({ user: userId });
-
-    // 2. 提取所有注册的 courseId
-    const courseIds = enrollments.map((e) => e.course);
-
-    // 3. 查找所有课程
-    const courses = await model.find({ _id: { $in: courseIds } });
-
     return courses;
-
-    // const enrolledCourses = courses.filter((course) =>
-    //   enrollments.some((enrollment) => {
-    //     const match = enrollment.user === userId && enrollment.course === course._id;
-    //     if (match) {
-    //       console.log(`✅ Matched course: ${course._id} for user: ${userId}`);
-    //     }
-    //     return match;
-    //   })
-    // );
-
-    // console.log("📦 Final enrolled courses:", enrolledCourses);
-    // return enrolledCourses;
-    return null;
   } catch (error) {
     console.error("Error in findCoursesForEnrolledUser:", error);
     throw error;
@@ -60,11 +43,14 @@ export async function findCoursesForEnrolledUser(userId) {
 //Saves the new course into Database.courses
 //Returns the newly created course
 export async function createCourse(course) {
+
   try {
-      const newCourse = { ...course, _id: uuidv4() };
-      // db.courses = [...db.courses, newCourse];
-      const createdCourse = await model.create(newCourse);//put in database
-      return createdCourse;
+    delete course._id;
+    return await model.create(course);
+  //     const newCourse = { ...course, _id: uuidv4() };
+  //     // db.courses = [...db.courses, newCourse];
+  //     const createdCourse = await model.create(newCourse);//put in database
+  //     return createdCourse;
   } catch (error) {
       console.error("Error in createCourse:", error);
       throw error;
@@ -84,11 +70,9 @@ export async function deleteCourse(courseId) {
       // const enrollmentStatus = await enrollmentModel.deleteMany({course: courseId})
       return status;
       // {
-        
         // deletedCourseCount: courseDeleteResult.deletedCount,
         // deletedEnrollmentsCount: enrollmentDeleteResult.deletedCount,
       // };
-
   } catch (error) {
       console.error("Error in deleteCourse:", error);
       throw error;

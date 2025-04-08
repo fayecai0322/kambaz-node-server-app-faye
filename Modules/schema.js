@@ -1,17 +1,18 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema(
     {
-        _id: String,
+        // _id: String,
         name: String,
         description: String,
         course:{type:String, ref: "CourseModel"}, //ref matches name "./Courses/model"
-        lessons:[
+        lessons: [
             {
-                _id:String,
-                name:String,
-                description:String,
+              _id: { type: mongoose.Schema.Types.ObjectId, auto: true },  // ✅ 添加这一行
+              name: String,
+              description: String,
+              editing: { type: Boolean, default: false },
             },
-        ],
+          ],
     },
     {collection:"modules"}
 );

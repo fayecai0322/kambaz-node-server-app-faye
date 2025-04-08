@@ -1,38 +1,45 @@
-import Database from "../Database/index.js";
-import { v4 as uuidv4 } from "uuid";
+// import Database from "../Database/index.js";
+// import { v4 as uuidv4 } from "uuid";
+import model from "./model.js";
 
-export function findAssignmentsForCourse(courseId) {
-    return Database.assignments.filter((a) => a.course === courseId);
+export async function findAssignmentsForCourse(courseId) {
+    // return Database.assignments.filter((a) => a.course === courseId);
+    return await model.find({ course: courseId });
   }
   
-  export function findAssignmentById(assignmentId) {
-    return Database.assignments.find((a) => a._id === assignmentId);
+  export async function findAssignmentById(assignmentId) {
+    // return Database.assignments.find((a) => a._id === assignmentId);
+    return await model.findById(assignmentId);
   }
   
-  export function createAssignment(courseId, assignmentData) {
-    const newAssignment = {
-      _id: uuidv4(),
-      course: courseId,
-      title: assignmentData.title || "Untitled Assignment",
-      description: assignmentData.description || "",
-      points: assignmentData.points || 100,
-      due: assignmentData.due || "",
-      availableFrom: assignmentData.availableFrom || "",
-      availableUntil: assignmentData.availableUntil || "",
+  export async function createAssignment(courseId, assignmentData) {
+    try {
+      if (assignmentData._id) delete assignmentData._id;
+      const newAssignment = {
+        ...assignmentData,
+        course: courseId,
+      };
+      console.log("🚀 Creating assignment in DB:", newAssignment);
+      const created = await model.create(newAssignment);
+      console.log("✅ Assignment created in DB:", created);
+      return created;
+    } catch (err) {
+      console.error("❌ Failed to create assignment:", err);
+      throw err;
     };
-    Database.assignments.push(newAssignment);
-    return newAssignment;
   }
   
-  export function updateAssignment(assignmentId, updates) {
-    const assignment = Database.assignments.find((a) => a._id === assignmentId);
-    if (!assignment) return null;
-    Object.assign(assignment, updates);
-    return assignment;
+  export async function updateAssignment(assignmentId, updates) {
+    return await model.updateOne({ _id: assignmentId }, { $set: updates });
+    // const assignment = Database.assignments.find((a) => a._id === assignmentId);
+    // if (!assignment) return null;
+    // Object.assign(assignment, updates);
+    // return assignment;
   }
   
-  export function deleteAssignment(assignmentId) {
-    const originalLength = Database.assignments.length;
-    Database.assignments = Database.assignments.filter((a) => a._id !== assignmentId);
-    return Database.assignments.length < originalLength;
+  export async function deleteAssignment(assignmentId) {
+    return await model.deleteOne({ _id: assignmentId });
+    // const originalLength = Database.assignments.length;
+    // Database.assignments = Database.assignments.filter((a) => a._id !== assignmentId);
+    // return Database.assignments.length < originalLength;
   }

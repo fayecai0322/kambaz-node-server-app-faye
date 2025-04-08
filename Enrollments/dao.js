@@ -35,8 +35,8 @@ export async function unenrollUserFromCourse(userId, courseId) {
 // ✅ 查找某用户所有注册记录
 export async function findEnrollmentsByUser(userId) {
   try {
-    const enrollments = await model.find({ user: userId });
-    return enrollments;
+    const enrollments = await model.find({ user: userId }).populate("course");
+    return enrollments.map(e => e.course);
   } catch (error) {
     console.error("❌ Error fetching enrollments:", error);
     throw error;
@@ -46,8 +46,8 @@ export async function findEnrollmentsByUser(userId) {
 // ✅ 查找某课程的所有注册记录
 export async function findEnrollmentsForCourse(courseId) {
   try {
-    const enrollments = await model.find({ course: courseId });
-    return enrollments;
+    const enrollments = await model.find({ course: courseId }).populate("user");
+    return enrollments.map(e => e.user);
   } catch (error) {
     console.error("❌ Error fetching enrollments for course:", error);
     throw error;
@@ -55,5 +55,11 @@ export async function findEnrollmentsForCourse(courseId) {
 }
 
 export async function findAllEnrollments() {
-  return await model.find();
+  // return await model.find();
+  return await model.find().populate("user").populate("course");
+}
+
+export async function findCoursesForUser(userId) {
+  const enrollments = await model.find({ user: userId }).populate("course");
+  return enrollments.map((enrollment) => enrollment.course);
 }
